@@ -1,85 +1,56 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-
-interface FileSpec {
-	name: string;
-	content: string;
+let webviewPanel;
+export function activate(context) {
+    console.log('Auto Filer extension activated');
+    // Register the sidebar webview provider
+    const provider = new FileSidebarProvider(context.extensionUri);
+    context.subscriptions.push(vscode.window.registerWebviewViewProvider('autofiler.fileCreator', provider, {
+        webviewOptions: {
+            retainContextWhenHidden: true,
+        },
+    }));
+    // Create files command
+    const createCommand = vscode.commands.registerCommand('autofiler.createFiles', async () => {
+        await createFilesDialog();
+    });
+    context.subscriptions.push(createCommand);
+    // Load config command
+    const loadConfigCommand = vscode.commands.registerCommand('autofiler.loadConfig', async () => {
+        await loadConfigFile();
+    });
+    context.subscriptions.push(loadConfigCommand);
 }
-
-let webviewPanel: vscode.WebviewPanel | undefined;
-
-export function activate(context: vscode.ExtensionContext) {
-	console.log('Auto Filer extension activated');
-
-	// Register the sidebar webview provider
-	const provider = new FileSidebarProvider(context.extensionUri);
-	context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider(
-			'autofiler.fileCreator',
-			provider,
-			{
-				webviewOptions: {
-					retainContextWhenHidden: true,
-				},
-			}
-		)
-	);
-
-	// Create files command
-	const createCommand = vscode.commands.registerCommand(
-		'autofiler.createFiles',
-		async () => {
-			await createFilesDialog();
-		}
-	);
-	context.subscriptions.push(createCommand);
-
-	// Load config command
-	const loadConfigCommand = vscode.commands.registerCommand(
-		'autofiler.loadConfig',
-		async () => {
-			await loadConfigFile();
-		}
-	);
-	context.subscriptions.push(loadConfigCommand);
-}
-
-class FileSidebarProvider implements vscode.WebviewViewProvider {
-	constructor(private readonly _extensionUri: vscode.Uri) {}
-
-	public resolveWebviewView(
-		webviewView: vscode.WebviewView,
-		context: vscode.WebviewViewResolveContext,
-		token: vscode.CancellationToken
-	) {
-		webviewView.webview.options = {
-			enableScripts: true,
-			localResourceRoots: [this._extensionUri],
-		};
-
-		webviewView.webview.html = this._getHtmlContent(webviewView.webview);
-
-		// Handle messages from webview
-		webviewView.webview.onDidReceiveMessage(async (message) => {
-			switch (message.command) {
-				case 'createFiles':
-					await handleCreateFiles(message.files);
-					webviewView.webview.postMessage({
-						command: 'fileSaved',
-						success: true,
-						message: `Created ${message.files.length} file(s) successfully!`,
-					});
-					break;
-				case 'loadConfig':
-					await loadConfigFile();
-					break;
-			}
-		});
-	}
-
-	private _getHtmlContent(webview: vscode.Webview): string {
-		return `<!DOCTYPE html>
+class FileSidebarProvider {
+    constructor(_extensionUri) {
+        this._extensionUri = _extensionUri;
+    }
+    resolveWebviewView(webviewView, context, token) {
+        webviewView.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [this._extensionUri],
+        };
+        webviewView.webview.html = this._getHtmlContent(webviewView.webview);
+        // Handle messages from webview
+        webviewView.webview.onDidReceiveMessage(async (message) => {
+            switch (message.command) {
+                case 'createFiles':
+                    await handleCreateFiles(message.files);
+                    webviewView.webview.postMessage({
+                        command: 'fileSaved',
+                        success: true,
+                        message: `Created ${message.files.length} file(s) successfully!`,
+                    });
+                    break;
+                case 'loadConfig':
+                    await loadConfigFile();
+                    break;
+            }
+        });
+    }
+    _getHtmlContent(webview) {
+        return `<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
@@ -302,31 +273,26 @@ class FileSidebarProvider implements vscode.WebviewViewProvider {
 	</script>
 </body>
 </html>`;
-	}
+    }
 }
-
-async function handleCreateFiles(files: FileSpec[]): Promise<void> {
-	const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-	if (!workspaceFolder) {
-		vscode.window.showErrorMessage('No workspace folder open');
-		return;
-	}
-
-	const rootPath = workspaceFolder.uri.fsPath;
-
-	for (const file of files) {
-		try {
-			const filePath = path.join(rootPath, file.name);
-			const dirPath = path.dirname(filePath);
-
-			// Create directories if they don't exist
-			if (!fs.existsSync(dirPath)) {
-				fs.mkdirSync(dirPath, { recursive: true });
-			}
-
-			// Write the file
-			fs.writeFileSync(filePath, file.content, 'utf-8');
-			console.log(\`Created file: \${filePath}\`);
+async function handleCreateFiles(files) {
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (!workspaceFolder) {
+        vscode.window.showErrorMessage('No workspace folder open');
+        return;
+    }
+    const rootPath = workspaceFolder.uri.fsPath;
+    for (const file of files) {
+        try {
+            const filePath = path.join(rootPath, file.name);
+            const dirPath = path.dirname(filePath);
+            // Create directories if they don't exist
+            if (!fs.existsSync(dirPath)) {
+                fs.mkdirSync(dirPath, { recursive: true });
+            }
+            // Write the file
+            fs.writeFileSync(filePath, file.content, 'utf-8');
+            console.log(`Created file: \${filePath}\`);
 		} catch (error) {
 			vscode.window.showErrorMessage(\`Failed to create file: \${error}\`);
 		}
@@ -371,3 +337,8 @@ async function loadConfigFile(): Promise<void> {
 }
 
 export function deactivate() {}
+            );
+        }
+        finally { }
+    }
+}

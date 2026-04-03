@@ -1,7 +1,6 @@
 {
-  "name": "autofiler",
-  "displayName": "Auto Filer",
-  "version": "0.0.1",
+  "name": "@xsquiddokidx/autofiler",
+  "version": "1.0.0",
   "description": "CLI tool to automatically create project files with customizable content",
   "main": "dist/index.js",
   "bin": {
@@ -15,15 +14,30 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/cli.js",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "cli",
     "file-generator",
     "project-scaffolding",
-    "autofiler"
+    "autofiler",
+    "boilerplate",
+    "template",
+    "setup"
   ],
-  "author": "",
+  "author": "XsquiddokidX",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/XsquiddokidX/autofiler.git"
+  },
+  "bugs": {
+    "url": "https://github.com/XsquiddokidX/autofiler/issues"
+  },
+  "homepage": "https://github.com/XsquiddokidX/autofiler#readme",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "license": "MIT",
   "dependencies": {
     "commander": "^12.0.0",
