@@ -1,71 +1,148 @@
-# autofiler README
+# Auto Filer
 
-This is the README for your extension "autofiler". After writing up a brief description, we recommend including the following sections.
+A CLI tool to automatically create project files with customizable content.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Interactive Mode**: Interactively add files and their content through prompts
+- **Config File Mode**: Load file specifications from a JSON configuration file
+- **Flexible**: Create single files or entire project structures
+- **Easy Installation**: Install globally or use in projects locally
 
-For example if there is an image subfolder under your extension project workspace:
+## Installation
 
-\!\[feature X\]\(images/feature-x.png\)
+### Global Installation (Recommended)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+```bash
+npm install -g autofiler
+```
 
-## Requirements
+### Local Installation
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+```bash
+npm install autofiler --save-dev
+```
 
-## Extension Settings
+## Usage
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+### Interactive Mode
 
-For example:
+Create files by answering interactive prompts:
 
-This extension contributes the following settings:
+```bash
+autofiler create
+```
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+The tool will guide you through:
+1. Enter a file name (e.g., `src/app.js`)
+2. Provide the file content (opens in your default editor)
+3. Add more files or create them
 
-## Known Issues
+### Configuration File Mode
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Create files from a JSON config file:
 
-## Release Notes
+```bash
+autofiler load autofiler.json
+```
 
-Users appreciate release notes as you update your extension.
+### Initialize Sample Config
 
-### 1.0.0
+Generate a sample `autofiler.json` file:
 
-Initial release of ...
+```bash
+autofiler init
+```
 
-### 1.0.1
+## Configuration File Format
 
-Fixed issue #.
+Create an `autofiler.json` file with the following structure:
 
-### 1.1.0
+```json
+{
+  "files": [
+    {
+      "name": "README.md",
+      "content": "# My Project\n\nProject description here.\n"
+    },
+    {
+      "name": "src/index.js",
+      "content": "console.log('Hello, World!');\n"
+    },
+    {
+      "name": ".gitignore",
+      "content": "node_modules/\n.env\n"
+    }
+  ]
+}
+```
 
-Added features X, Y, and Z.
+### File Name Patterns
 
----
+- Use forward slashes (`/`) for nested directories
+- Directories will be created automatically if they don't exist
+- Examples: `src/index.js`, `config/settings.json`, `docs/README.md`
 
-## Following extension guidelines
+## Examples
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+### Example 1: Create a Node.js Project
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+```bash
+autofiler create
+```
 
-## Working with Markdown
+Then add these files:
+- `package.json` - Package configuration
+- `src/index.js` - Main entry point
+- `.gitignore` - Git ignore rules
+- `README.md` - Project documentation
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+### Example 2: Use Configuration File
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+1. Create `project-setup.json`:
 
-## For more information
+```json
+{
+  "files": [
+    {
+      "name": "package.json",
+      "content": "{\n  \"name\": \"my-project\",\n  \"version\": \"1.0.0\"\n}"
+    },
+    {
+      "name": "src/app.ts",
+      "content": "export const hello = () => 'Hello, TypeScript!';"
+    },
+    {
+      "name": "tsconfig.json",
+      "content": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2020\"\n  }\n}"
+    }
+  ]
+}
+```
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+2. Run Auto Filer:
 
-**Enjoy!**
+```bash
+autofiler load project-setup.json
+```
+
+## Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| `autofiler create` | Interactively create files |
+| `autofiler load <file>` | Load files from a JSON config file |
+| `autofiler init` | Create a sample `autofiler.json` |
+| `autofiler --help` | Show help |
+| `autofiler --version` | Show version |
+
+## Tips
+
+- Use the config file mode for repeatible project structures
+- Store config files in your repository to share project templates
+- Use the interactive mode for one-off file creation
+- File content supports newlines and special characters in JSON strings
+
+## License
+
+MIT
